@@ -1,0 +1,147 @@
+# =============================================================================
+# Nombre:  Carlos Rene Lopez Cervantes
+# Grupo:   952
+# Materia: Programación para la Extracción de Datos
+# Fecha:   01/11/2026
+# Actividad: Meta 3.1 - Implementar funciones para agrupar, transformar y
+#            resumir datos.
+#
+# Descripción general:
+#   A partir de una tabla de ventas de frutas en tres tiendas (A, B y C) se
+#   realizan cinco funciones que transforman los datos con map(), los agrupan
+#   con groupby() y los resumen en tablas dinámicas con pivot_table().
+# =============================================================================
+
+import pandas as pd
+
+# Mostrar todas las columnas al imprimir (para que no salga "...")
+pd.set_option("display.max_columns", None)
+pd.set_option("display.width", 200)
+
+def crear_datos():
+    # Crea el DataFrame con los datos de la actividad.
+    data = {
+        "Tienda": ["A", "A", "A", "B", "B", "B", "C", "C", "C"],
+        "Producto": ["Manzana", "Plátano", "Naranja",
+                     "Manzana", "Plátano", "Naranja",
+                     "Manzana", "Plátano", "Naranja"],
+        "Categoría": ["Fruta"] * 9,
+        "Precio": [30, 20, 35, 25, 30, 45, 35, 20, 25],
+        "Cantidad Vendida": [50, 30, 20, 60, 25, 35, 55, 20, 30],
+        "Calificación": ["A", "B", "C", "A", "B", "A", "C", "B", "A"],
+    }
+    df = pd.DataFrame(data)
+    return df
+
+
+# -----------------------------------------------------------------------------
+# Ejercicio 1. Asignar Código
+# Descripción: Crear la columna "Código de Tienda" que asigne un código
+# numérico a cada tienda (A = 1, B = 2, C = 3) y la columna
+# "Calificación Numérica" que convierta las calificaciones A, B y C en valores
+# numéricos (A = 3, B = 2, C = 1), usando map().
+#
+# ¿Qué es map()? Es un método de las Series de pandas que recibe un
+# diccionario (o una función) y reemplaza cada valor de la columna por el
+# valor que le corresponde en ese diccionario. Si un valor no existe en el
+# diccionario, el resultado es NaN (nulo).
+# -----------------------------------------------------------------------------
+def asignar_codigo(df: pd.DataFrame):
+    codigos_tienda = {
+        "A": 1,
+        "B": 2,
+        "C": 3,
+    }
+    calificaciones = {
+        "A": 3,
+        "B": 2,
+        "C": 1,
+    }
+    df["Código de Tienda"] = df["Tienda"].map(codigos_tienda)
+    df["Calificación Numérica"] = df["Calificación"].map(calificaciones)
+    print(df)
+    return df
+
+
+# -----------------------------------------------------------------------------
+# Ejercicio 2. Total de Ventas por Tienda
+# Descripción: Agrupar los datos por Tienda y calcular el total de ventas.
+# La venta de cada fila es Precio * Cantidad Vendida; después se suman las
+# ventas de cada tienda con groupby().
+# -----------------------------------------------------------------------------
+def total_ventas_tienda(df: pd.DataFrame):
+    df["Total Venta"] = df["Precio"] * df["Cantidad Vendida"]
+    res = df.groupby("Tienda")["Total Venta"].sum()
+    print(res)
+    return res
+
+
+# -----------------------------------------------------------------------------
+# Ejercicio 3. Precio Promedio de Producto por Tienda
+# Descripción: Agrupar por Tienda y calcular el precio promedio de los
+# productos (Manzana, Plátano y Naranja) que se venden en cada tienda.
+# -----------------------------------------------------------------------------
+def precio_promedio_tienda(df: pd.DataFrame):
+    res = df.groupby("Tienda")["Precio"].mean().round(2)
+    print(res)
+    return res
+
+
+# -----------------------------------------------------------------------------
+# Ejercicio 4. Cantidad Vendida por Producto y Tienda
+# Descripción: Usar pivot_table() para crear una tabla que muestre la
+# Cantidad Vendida de cada Producto (filas) en cada Tienda (columnas).
+# Se agregan totales por fila y por columna con margins.
+# -----------------------------------------------------------------------------
+def cantidad_producto_tienda(df: pd.DataFrame):
+    tabla = pd.pivot_table(
+        df,
+        values="Cantidad Vendida",
+        index="Producto",
+        columns="Tienda",
+        aggfunc="sum",
+        fill_value=0,
+        margins=True,
+        margins_name="Total"
+    )
+    print(tabla)
+    return tabla
+
+
+# -----------------------------------------------------------------------------
+# Ejercicio 5. Total de Ventas por Tienda y Producto
+# Descripción: Usar pivot_table() para crear una tabla que muestre el total
+# de ventas (Precio * Cantidad Vendida) de cada Producto en cada Tienda.
+# -----------------------------------------------------------------------------
+def ventas_producto_tienda(df: pd.DataFrame):
+    df["Total Venta"] = df["Precio"] * df["Cantidad Vendida"]
+    tabla = pd.pivot_table(
+        df,
+        values="Total Venta",
+        index="Producto",
+        columns="Tienda",
+        aggfunc="sum",
+        fill_value=0,
+        margins=True,
+        margins_name="Total"
+    )
+    print(tabla)
+    return tabla
+
+
+if __name__ == "__main__":
+    df = crear_datos()
+    print("Ejercicio 1. Asignar Código")
+    asignar_codigo(df)
+    print("=================================================================================")
+    print("Ejercicio 2. Total de Ventas por Tienda")
+    total_ventas_tienda(df)
+    print("=================================================================================")
+    print("Ejercicio 3. Precio Promedio de Producto por Tienda")
+    precio_promedio_tienda(df)
+    print("=================================================================================")
+    print("Ejercicio 4. Cantidad Vendida por Producto y Tienda")
+    cantidad_producto_tienda(df)
+    print("=================================================================================")
+    print("Ejercicio 5. Total de Ventas por Tienda y Producto")
+    ventas_producto_tienda(df)
